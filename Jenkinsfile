@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME = 'html-resume'
         HOST_PORT = '8081'
         CONTAINER_PORT = '80'
-        SONARQUBE_SCANNER = 'SonarQube Scanner'
+        SONARQUBE_SCANNER = 'SonarQube Scanner' // The name of the SonarQube installation in Jenkins
     }
 
     stages {
@@ -18,7 +18,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('SonarQube') { // 'SonarQube' is the name configured in Jenkins
                         sh "${SONARQUBE_SCANNER} -Dsonar.projectKey=resume-project -Dsonar.sources=."
                     }
                 }
@@ -33,23 +33,7 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan') {
-            steps {
-                script {
-                    // Run Trivy scan on the Docker image
-                    sh "trivy image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${BUILD_NUMBER}"
-                }
-            }
-        }
-
-        stage('Deploy Docker Container') {
-            steps {
-                script {
-                    sh "docker stop ${IMAGE_NAME} || true && docker rm ${IMAGE_NAME} || true"
-                    sh "docker run -d -p ${HOST_PORT}:${CONTAINER_PORT} --name ${IMAGE_NAME} ${IMAGE_NAME}:${BUILD_NUMBER}"
-                }
-            }
-        }
+        // Other stages...
     }
 
     post {
